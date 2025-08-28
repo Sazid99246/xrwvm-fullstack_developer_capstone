@@ -13,7 +13,7 @@ from django.contrib.auth import login, authenticate
 import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
-# from .populate import initiate
+from .populate import initiate
 
 
 # Get an instance of a logger
@@ -45,36 +45,50 @@ def logout_request(request):
     return JsonResponse(data)
 
 # Create a `registration` view to handle sign up request
+from django.contrib.auth.models import User
+from django.contrib.auth import login
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+import logging
+
+logger = logging.getLogger(__name__)
+
 @csrf_exempt
 def registration(request):
-    context = {}
-    # Load JSON data from the request body
-    data = json.loads(request.body)
-    username = data['userName']
-    password = data['password']
-    first_name = data['firstName']
-    last_name = data['lastName']
-    email = data['email']
-    username_exist = False
-    email_exist = False
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required"}, status=400)
+
     try:
-        # Check if user already exists
-        User.objects.get(username=username)
-        username_exist = True
-    except:
-        # If not, simply log this is a new user
-        logger.debug("{} is new user".format(username))
-    # If it is a new user
-    if not username_exist:
-        # Create user in auth_user table
-        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name,password=password, email=email)
-        # Login the user and redirect to list page
+        data = json.loads(request.body)
+        username = data.get('userName')
+        password = data.get('password')
+        first_name = data.get('firstName', '')
+        last_name = data.get('lastName', '')
+        email = data.get('email', '')
+
+        if not username or not password:
+            return JsonResponse({"error": "Username and password are required"}, status=400)
+
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({"userName": username, "error": "Already Registered"}, status=400)
+
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            email=email
+        )
+
         login(request, user)
-        data = {"userName":username,"status":"Authenticated"}
-        return JsonResponse(data)
-    else :
-        data = {"userName":username,"error":"Already Registered"}
-        return JsonResponse(data)
+        return JsonResponse({"userName": username, "status": "Authenticated"})
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        logger.exception("Error during registration")
+        return JsonResponse({"error": str(e)}, status=500)
 
 # # Update the `get_dealerships` view to render the index page with
 # a list of dealerships
