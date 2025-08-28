@@ -11,7 +11,7 @@ app.use(require('body-parser').urlencoded({ extended: false }));
 const reviews_data = JSON.parse(fs.readFileSync("reviews.json", 'utf8'));
 const dealerships_data = JSON.parse(fs.readFileSync("dealerships.json", 'utf8'));
 
-mongoose.connect("mongodb://mongo_db:27017/",{'dbName':'dealershipsDB'});
+mongoose.connect("mongodb://root:Ws1Sk4BFd3PqfDSt2XhYexD0@172.21.74.110:27017",{'dbName':'dealershipsDB'});
 
 
 const Reviews = require('./review');
