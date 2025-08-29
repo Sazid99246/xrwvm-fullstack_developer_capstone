@@ -90,7 +90,8 @@ def get_cars(request):
         initiate()
 
     car_models = CarModel.objects.select_related('car_make')
-    cars = [{"CarModel": cm.name, "CarMake": cm.car_make.name} for cm in car_models]
+    cars = [{"CarModel": cm.name, "CarMake": cm.car_make.name}
+            for cm in car_models]
     return JsonResponse({"CarModels": cars})
 
 
@@ -130,8 +131,10 @@ def get_dealer_reviews(request, dealer_id):
         endpoint = f"/fetchReviews/dealer/{dealer_id}"
         reviews = get_request(endpoint)
         for review_detail in reviews:
-            sentiment_response = analyze_review_sentiments(review_detail.get('review', ''))
-            review_detail['sentiment'] = sentiment_response.get('sentiment', 'unknown')
+            sentiment_response = analyze_review_sentiments(
+                review_detail.get('review', ''))
+            review_detail['sentiment'] = sentiment_response.get(
+                'sentiment', 'unknown')
         return JsonResponse({"status": 200, "reviews": reviews})
     return JsonResponse({"status": 400, "message": "Bad Request"})
 
