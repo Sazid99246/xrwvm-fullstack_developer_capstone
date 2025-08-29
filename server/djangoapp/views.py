@@ -66,9 +66,9 @@ def registration(request):
         if User.objects.filter(username=username).exists():
             return JsonResponse(
                 {
-                    "userName": username, 
+                    "userName": username,
                     "error": "Already Registered"
-                }, 
+                },
                 status=400)
 
         user = User.objects.create_user(
@@ -168,7 +168,7 @@ def add_review(request):
             logger.error(f"Error posting review: {e}")
             return JsonResponse(
                 {
-                    "status": 401, 
+                    "status": 401,
                     "message": "Error in posting review"
                 })
     return JsonResponse({"status": 403, "message": "Unauthorized"})
